@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animação do Messi no p5.js</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #1a1a1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        canvas {
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        }
+    </style>
+</head>
+<body>
+
+    <script>
+        let yOffset = 0;
+
+        function setup() {
+            // Cria a tela de desenho
+            createCanvas(600, 400);
+        }
+
+        function draw() {
+            background(220, 240, 255); // Fundo azul claro (banheiro)
+            
+            // --- DESENHO DA PRIVADA (Estática) ---
+            fill(240); // Branco para a louça
+            stroke(200);
+            strokeWeight(2);
+            
+            // Base da privada
+            rect(250, 280, 100, 80, 10);
+            // Assento/Vaso
+            ellipse(300, 280, 140, 60);
+            // Caixa de descarga
+            rect(230, 160, 60, 130, 5);
+            // Botão da descarga
+            fill(200);
+            ellipse(250, 180, 15, 15);
+
+            // --- ANIMAÇÃO DO MESSI (Subindo e Descendo) ---
+            // O movimento de vaivém usa a função seno (sin)
+            yOffset = sin(frameCount * 0.05) * 20;
+            
+            push();
+            translate(0, yOffset); // Aplica o movimento vertical apenas no Messi
+            
+            // Corpo / Camisa (Listras horizontais para simplificar a textura)
+            fill(116, 172, 223); // Azul Argentina
+            noStroke();
+            rect(275, 210, 50, 60, 10);
+            fill(255); // Listra branca no meio
+            rect(290, 210, 20, 60);
+            
+            // Número 10 na camisa
+            fill(0);
+            textSize(16);
+            textAlign(CENTER);
+            text("10", 300, 245);
+            
+            // Cabeça
+            fill(255, 219, 172); // Tom de pele
+            ellipse(300, 175, 45, 50);
+            
+            // Cabelo e Barba (Castanho)
+            fill(80, 50, 30);
+            arc(300, 165, 46, 30, PI, TWO_PI); // Cabelo
+            arc(300, 185, 40, 30, 0, PI); // Barba
+            
+            // Olhos
+            fill(255);
+            ellipse(290, 175, 8, 8);
+            ellipse(310, 175, 8, 8);
+            fill(0);
+            ellipse(290, 175, 4, 4);
+            ellipse(310, 175, 4, 4);
+            
+            // Nariz e Sorriso
+            noFill();
+            stroke(0);
+            strokeWeight(1);
+            arc(300, 180, 6, 6, 0, PI); // Sorriso
+            
+            pop(); // Reseta a translação para não afetar o cenário
+            
+            // --- CHÃO ---
+            fill(180);
+            noStroke();
+            rect(0, 360, width, 40);
+        }
+    </script>
+
+</body>
+</html>
