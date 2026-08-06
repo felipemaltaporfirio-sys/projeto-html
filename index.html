@@ -1,3 +1,24 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Mini Jogo Fórmula 1</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #222;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+  </style>
+</head>
+<body>
+
+<script>
 let jogadorX;
 let jogadorY;
 let larguraCarro = 30;
@@ -28,7 +49,7 @@ function draw() {
   }
 }
 
-// Desenha as zebras/grama e o movimento contínuo da pista
+// Desenha a pista
 function desenharPista() {
   noStroke();
   
@@ -60,7 +81,7 @@ function atualizarJogador() {
 
 // Desenha o F1 do Jogador (Vermelho)
 function desenharJogador() {
-  fill(220, 20, 60); // Vermelho F1
+  fill(220, 20, 60);
   rect(jogadorX, jogadorY, larguraCarro, alturaCarro, 5);
   
   // Aerofólios
@@ -73,11 +94,9 @@ function desenharJogador() {
 function gerenciarInimigos() {
   let intervaloGeracao = Math.max(25, Math.floor(500 / velocidadeInimigos));
 
-  // Cria novos inimigos periodicamente
   if (frameCount % intervaloGeracao === 0) {
     let novoX = random(60, 340 - larguraCarro);
     
-    // Garante que o novo inimigo não nasça colado em outro existente
     let podeGerar = true;
     for (let inimigo of inimigos) {
       if (inimigo.y < alturaCarro * 2) {
@@ -94,7 +113,6 @@ function gerenciarInimigos() {
   for (let i = inimigos.length - 1; i >= 0; i--) {
     inimigos[i].y += velocidadeInimigos;
 
-    // Desenha o adversário (Azul)
     fill(30, 144, 255);
     rect(inimigos[i].x, inimigos[i].y, larguraCarro, alturaCarro, 5);
 
@@ -108,12 +126,10 @@ function gerenciarInimigos() {
       gameOver = true;
     }
 
-    // Passou pelo inimigo: ganha pontos
     if (inimigos[i].y > height) {
       inimigos.splice(i, 1);
       pontos += 10;
       
-      // Aumenta a velocidade progressivamente
       if (pontos % 50 === 0) {
         velocidadeInimigos += 0.5;
       }
@@ -153,7 +169,6 @@ function reiniciarJogo() {
   gameOver = false;
 }
 
-// Controles de Reinício
 function keyPressed() {
   if ((key === 'r' || key === 'R') && gameOver) {
     reiniciarJogo();
@@ -165,3 +180,7 @@ function mousePressed() {
     reiniciarJogo();
   }
 }
+</script>
+
+</body>
+</html>
