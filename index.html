@@ -7,11 +7,11 @@ let inimigos = [];
 let velocidadeInimigos = 5;
 let pontos = 0;
 let gameOver = false;
+let deslocamentoPista = 0;
 
 function setup() {
   createCanvas(400, 600);
-  jogadorX = width / 2 - larguraCarro / 2;
-  jogadorY = height - 80;
+  reiniciarJogo();
 }
 
 function draw() {
@@ -28,19 +28,21 @@ function draw() {
   }
 }
 
-// Desenha a grama e as faixas centrais da pista
+// Desenha a grama e o movimento contínuo da pista
 function desenharPista() {
   // Grama nas laterais
+  noStroke();
   fill(34, 139, 34);
   rect(0, 0, 50, height);
   rect(350, 0, 50, height);
 
-  // Linhas brancas no centro
+  // Animação contínua da linha central
   stroke(255);
   strokeWeight(4);
-  for (let y = 0; y < height; y += 40) {
-    let linhaY = (y + frameCount * 5) % height;
-    line(width / 2, linhaY, width / 2, linhaY + 20);
+  deslocamentoPista = (deslocamentoPista + velocidadeInimigos) % 40;
+  
+  for (let y = -40; y < height; y += 40) {
+    line(width / 2, y + deslocamentoPista, width / 2, y + 20 + deslocamentoPista);
   }
   noStroke();
 }
@@ -48,10 +50,10 @@ function desenharPista() {
 // Movimentação do jogador
 function atualizarJogador() {
   if (keyIsDown(LEFT_ARROW) && jogadorX > 55) {
-    jogadorX -= 5;
+    jogadorX -= 6;
   }
   if (keyIsDown(RIGHT_ARROW) && jogadorX < 345 - larguraCarro) {
-    jogadorX += 5;
+    jogadorX += 6;
   }
 }
 
@@ -60,7 +62,7 @@ function desenharJogador() {
   fill(220, 20, 60); // Vermelho F1
   rect(jogadorX, jogadorY, larguraCarro, alturaCarro, 5);
   
-  // Aerofólio dianteiro/traseiro
+  // Aerofólios
   fill(20);
   rect(jogadorX - 5, jogadorY + 5, larguraCarro + 10, 8);
   rect(jogadorX - 2, jogadorY + alturaCarro - 8, larguraCarro + 4, 8);
@@ -68,8 +70,8 @@ function desenharJogador() {
 
 // Gera e move os carros adversários
 function gerenciarInimigos() {
-  // Cria um novo inimigo periodicamente
-  if (frameCount % 60 === 0) {
+  // Ajusta o tempo de surgimento de novos inimigos dinamicamente
+  if (frameCount % Math.max(20, Math.floor(600 / velocidadeInimigos)) === 0) {
     let xInimigo = random(60, 340 - larguraCarro);
     inimigos.push({ x: xInimigo, y: -alturaCarro });
   }
@@ -81,7 +83,7 @@ function gerenciarInimigos() {
     fill(30, 144, 255);
     rect(inimigos[i].x, inimigos[i].y, larguraCarro, alturaCarro, 5);
 
-    // Checa colisão com o jogador
+    // Detecção de Colisão
     if (
       jogadorX < inimigos[i].x + larguraCarro &&
       jogadorX + larguraCarro > inimigos[i].x &&
@@ -91,12 +93,12 @@ function gerenciarInimigos() {
       gameOver = true;
     }
 
-    // Se o inimigo sair da tela, soma pontos
+    // Passou pelo inimigo: ganha ponto
     if (inimigos[i].y > height) {
       inimigos.splice(i, 1);
       pontos += 10;
       
-      // Aumenta a velocidade progressivamente
+      // Aumenta a velocidade progressivamente a cada 50 pontos
       if (pontos % 50 === 0) {
         velocidadeInimigos += 0.5;
       }
@@ -124,16 +126,27 @@ function exibirTelaGameOver() {
   textSize(20);
   text("Pontuação Final: " + pontos, width / 2, height / 2 + 20);
   textSize(14);
-  text("Pressione R para reiniciar", width / 2, height / 2 + 60);
+  text("Pressione 'R' ou clique na tela para reiniciar", width / 2, height / 2 + 60);
 }
 
-// Reinicia o jogo ao pressionar 'R'
+function reiniciarJogo() {
+  pontos = 0;
+  velocidadeInimigos = 5;
+  inimigos = [];
+  jogadorX = width / 2 - larguraCarro / 2;
+  jogadorY = height - 80;
+  gameOver = false;
+}
+
+// Controles de Reinício
 function keyPressed() {
   if ((key === 'r' || key === 'R') && gameOver) {
-    pontos = 0;
-    velocidadeInimigos = 5;
-    inimigos = [];
-    jogadorX = width / 2 - larguraCarro / 2;
-    gameOver = false;
+    reiniciarJogo();
+  }
+}
+
+function mousePressed() {
+  if (gameOver) {
+    reiniciarJogo();
   }
 }
