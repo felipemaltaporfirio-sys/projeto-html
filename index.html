@@ -28,15 +28,16 @@ function draw() {
   }
 }
 
-// Desenha a grama e o movimento contínuo da pista
+// Desenha as zebras/grama e o movimento contínuo da pista
 function desenharPista() {
-  // Grama nas laterais
   noStroke();
+  
+  // Grama nas laterais
   fill(34, 139, 34);
   rect(0, 0, 50, height);
   rect(350, 0, 50, height);
 
-  // Animação contínua da linha central
+  // Linhas brancas no centro da pista
   stroke(255);
   strokeWeight(4);
   deslocamentoPista = (deslocamentoPista + velocidadeInimigos) % 40;
@@ -70,10 +71,24 @@ function desenharJogador() {
 
 // Gera e move os carros adversários
 function gerenciarInimigos() {
-  // Ajusta o tempo de surgimento de novos inimigos dinamicamente
-  if (frameCount % Math.max(20, Math.floor(600 / velocidadeInimigos)) === 0) {
-    let xInimigo = random(60, 340 - larguraCarro);
-    inimigos.push({ x: xInimigo, y: -alturaCarro });
+  let intervaloGeracao = Math.max(25, Math.floor(500 / velocidadeInimigos));
+
+  // Cria novos inimigos periodicamente
+  if (frameCount % intervaloGeracao === 0) {
+    let novoX = random(60, 340 - larguraCarro);
+    
+    // Garante que o novo inimigo não nasça colado em outro existente
+    let podeGerar = true;
+    for (let inimigo of inimigos) {
+      if (inimigo.y < alturaCarro * 2) {
+        podeGerar = false;
+        break;
+      }
+    }
+
+    if (podeGerar) {
+      inimigos.push({ x: novoX, y: -alturaCarro });
+    }
   }
 
   for (let i = inimigos.length - 1; i >= 0; i--) {
@@ -93,12 +108,12 @@ function gerenciarInimigos() {
       gameOver = true;
     }
 
-    // Passou pelo inimigo: ganha ponto
+    // Passou pelo inimigo: ganha pontos
     if (inimigos[i].y > height) {
       inimigos.splice(i, 1);
       pontos += 10;
       
-      // Aumenta a velocidade progressivamente a cada 50 pontos
+      // Aumenta a velocidade progressivamente
       if (pontos % 50 === 0) {
         velocidadeInimigos += 0.5;
       }
@@ -126,7 +141,7 @@ function exibirTelaGameOver() {
   textSize(20);
   text("Pontuação Final: " + pontos, width / 2, height / 2 + 20);
   textSize(14);
-  text("Pressione 'R' ou clique na tela para reiniciar", width / 2, height / 2 + 60);
+  text("Pressione 'R' ou clique para reiniciar", width / 2, height / 2 + 60);
 }
 
 function reiniciarJogo() {
