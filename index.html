@@ -1,106 +1,139 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Animação do Messi no p5.js</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #1a1a1a;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            overflow: hidden;
-        }
-        canvas {
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-        }
-    </style>
-</head>
-<body>
+let jogadorX;
+let jogadorY;
+let larguraCarro = 30;
+let alturaCarro = 50;
 
-    <script>
-        let yOffset = 0;
+let inimigos = [];
+let velocidadeInimigos = 5;
+let pontos = 0;
+let gameOver = false;
 
-        function setup() {
-            // Cria a tela de desenho
-            createCanvas(600, 400);
-        }
+function setup() {
+  createCanvas(400, 600);
+  jogadorX = width / 2 - larguraCarro / 2;
+  jogadorY = height - 80;
+}
 
-        function draw() {
-            background(220, 240, 255); // Fundo azul claro (banheiro)
-            
-            // --- DESENHO DA PRIVADA (Estática) ---
-            fill(240); // Branco para a louça
-            stroke(200);
-            strokeWeight(2);
-            
-            // Base da privada
-            rect(250, 280, 100, 80, 10);
-            // Assento/Vaso
-            ellipse(300, 280, 140, 60);
-            // Caixa de descarga
-            rect(230, 160, 60, 130, 5);
-            // Botão da descarga
-            fill(200);
-            ellipse(250, 180, 15, 15);
+function draw() {
+  background(50); // Cor do asfalto
 
-            // --- ANIMAÇÃO DO MESSI (Subindo e Descendo) ---
-            // O movimento de vaivém usa a função seno (sin)
-            yOffset = sin(frameCount * 0.05) * 20;
-            
-            push();
-            translate(0, yOffset); // Aplica o movimento vertical apenas no Messi
-            
-            // Corpo / Camisa (Listras horizontais para simplificar a textura)
-            fill(116, 172, 223); // Azul Argentina
-            noStroke();
-            rect(275, 210, 50, 60, 10);
-            fill(255); // Listra branca no meio
-            rect(290, 210, 20, 60);
-            
-            // Número 10 na camisa
-            fill(0);
-            textSize(16);
-            textAlign(CENTER);
-            text("10", 300, 245);
-            
-            // Cabeça
-            fill(255, 219, 172); // Tom de pele
-            ellipse(300, 175, 45, 50);
-            
-            // Cabelo e Barba (Castanho)
-            fill(80, 50, 30);
-            arc(300, 165, 46, 30, PI, TWO_PI); // Cabelo
-            arc(300, 185, 40, 30, 0, PI); // Barba
-            
-            // Olhos
-            fill(255);
-            ellipse(290, 175, 8, 8);
-            ellipse(310, 175, 8, 8);
-            fill(0);
-            ellipse(290, 175, 4, 4);
-            ellipse(310, 175, 4, 4);
-            
-            // Nariz e Sorriso
-            noFill();
-            stroke(0);
-            strokeWeight(1);
-            arc(300, 180, 6, 6, 0, PI); // Sorriso
-            
-            pop(); // Reseta a translação para não afetar o cenário
-            
-            // --- CHÃO ---
-            fill(180);
-            noStroke();
-            rect(0, 360, width, 40);
-        }
-    </script>
+  if (!gameOver) {
+    desenharPista();
+    atualizarJogador();
+    desenharJogador();
+    gerenciarInimigos();
+    exibirPontuacao();
+  } else {
+    exibirTelaGameOver();
+  }
+}
 
-</body>
-</html>
+// Desenha a grama e as faixas centrais da pista
+function desenharPista() {
+  // Grama nas laterais
+  fill(34, 139, 34);
+  rect(0, 0, 50, height);
+  rect(350, 0, 50, height);
+
+  // Linhas brancas no centro
+  stroke(255);
+  strokeWeight(4);
+  for (let y = 0; y < height; y += 40) {
+    let linhaY = (y + frameCount * 5) % height;
+    line(width / 2, linhaY, width / 2, linhaY + 20);
+  }
+  noStroke();
+}
+
+// Movimentação do jogador
+function atualizarJogador() {
+  if (keyIsDown(LEFT_ARROW) && jogadorX > 55) {
+    jogadorX -= 5;
+  }
+  if (keyIsDown(RIGHT_ARROW) && jogadorX < 345 - larguraCarro) {
+    jogadorX += 5;
+  }
+}
+
+// Desenha o F1 do Jogador (Vermelho)
+function desenharJogador() {
+  fill(220, 20, 60); // Vermelho F1
+  rect(jogadorX, jogadorY, larguraCarro, alturaCarro, 5);
+  
+  // Aerofólio dianteiro/traseiro
+  fill(20);
+  rect(jogadorX - 5, jogadorY + 5, larguraCarro + 10, 8);
+  rect(jogadorX - 2, jogadorY + alturaCarro - 8, larguraCarro + 4, 8);
+}
+
+// Gera e move os carros adversários
+function gerenciarInimigos() {
+  // Cria um novo inimigo periodicamente
+  if (frameCount % 60 === 0) {
+    let xInimigo = random(60, 340 - larguraCarro);
+    inimigos.push({ x: xInimigo, y: -alturaCarro });
+  }
+
+  for (let i = inimigos.length - 1; i >= 0; i--) {
+    inimigos[i].y += velocidadeInimigos;
+
+    // Desenha o adversário (Azul)
+    fill(30, 144, 255);
+    rect(inimigos[i].x, inimigos[i].y, larguraCarro, alturaCarro, 5);
+
+    // Checa colisão com o jogador
+    if (
+      jogadorX < inimigos[i].x + larguraCarro &&
+      jogadorX + larguraCarro > inimigos[i].x &&
+      jogadorY < inimigos[i].y + alturaCarro &&
+      jogadorY + alturaCarro > inimigos[i].y
+    ) {
+      gameOver = true;
+    }
+
+    // Se o inimigo sair da tela, soma pontos
+    if (inimigos[i].y > height) {
+      inimigos.splice(i, 1);
+      pontos += 10;
+      
+      // Aumenta a velocidade progressivamente
+      if (pontos % 50 === 0) {
+        velocidadeInimigos += 0.5;
+      }
+    }
+  }
+}
+
+function exibirPontuacao() {
+  fill(255);
+  textSize(20);
+  textAlign(LEFT, TOP);
+  text("Pontos: " + pontos, 60, 20);
+}
+
+function exibirTelaGameOver() {
+  fill(0, 180);
+  rect(0, 0, width, height);
+
+  fill(255, 50, 50);
+  textSize(36);
+  textAlign(CENTER, CENTER);
+  text("FIM DE JOGO!", width / 2, height / 2 - 20);
+
+  fill(255);
+  textSize(20);
+  text("Pontuação Final: " + pontos, width / 2, height / 2 + 20);
+  textSize(14);
+  text("Pressione R para reiniciar", width / 2, height / 2 + 60);
+}
+
+// Reinicia o jogo ao pressionar 'R'
+function keyPressed() {
+  if ((key === 'r' || key === 'R') && gameOver) {
+    pontos = 0;
+    velocidadeInimigos = 5;
+    inimigos = [];
+    jogadorX = width / 2 - larguraCarro / 2;
+    gameOver = false;
+  }
+}
